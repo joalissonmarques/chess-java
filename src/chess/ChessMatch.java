@@ -9,12 +9,25 @@ import chess.pieces.Rook;
 public class ChessMatch {
 //Aqui é onde terá as regras do jogo
 	
+	private int turn;
+	private Color currentPlayer;
 	private Board board;
 	
 	public ChessMatch() {
+		//turno e qual é a cor iniciante
+		turn = 1;
+		currentPlayer = Color.WHITE;
 		//Definindo o tamanho do tabuleiro
 		board = new Board(8, 8);
 		initialSetup();
+	}
+	
+	public int getTurn() {
+		return turn;
+	}
+	
+	public Color getCurrentPlayer() {
+		return currentPlayer;
 	}
 	
 	public ChessPiece[][] getPieces(){
@@ -43,6 +56,8 @@ public class ChessMatch {
 		validateTargetPosition(source, target);
 		//Operação que irá realizar o movimento da peça
 		Piece capturedPiece = makeMove(source, target);
+		//Chamando a troca de player
+		nextTurn();
 		return (ChessPiece)capturedPiece;
 	}
 	
@@ -58,6 +73,10 @@ public class ChessMatch {
 		if(!board.thereIsAPiece(position)) {
 			throw new ChessExeception("There is no piece on source position!");
 		}
+		//Pegamos a peça, fazemos um downcast para acessar a prop getColor
+		if(currentPlayer != ((ChessPiece)board.piece(position)).getColor()) {
+			throw new ChessExeception("The chosen piece is not yours!");
+		}
 		if(!board.piece(position).isThereAnyPossibleMove()) {
 			throw new ChessExeception("There is no possible moves for the chosen peice!");
 		}
@@ -68,6 +87,12 @@ public class ChessMatch {
 		if(!board.piece(source).possibleMove(target)) {
 			throw new ChessExeception("The chosen piece can't move to target position!");
 		}
+	}
+	
+	private void nextTurn() {
+		turn++;
+		//Expressão ternaria
+		currentPlayer = (currentPlayer == Color.WHITE) ? Color.BLACK : Color.WHITE;
 	}
 	
 	private void placeNewPiece(char column, int row, ChessPiece piece) {
